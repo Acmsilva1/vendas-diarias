@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vendas</title>
+    <title>Vendas - Gestão</title>
     <link rel="manifest" href="./manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,6 +13,7 @@
         .card-glass { background: #1a1a1a; border: 1px solid #2d2d2d; border-radius: 1rem; }
         .text-lucro { color: #10b981; }
         .text-custo { color: #ef4444; }
+        .text-reserva { color: #f59e0b; } /* Laranja para o que é reserva */
         ::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -20,7 +21,7 @@
 
     <div id="loader" class="fixed inset-0 bg-black flex flex-col items-center justify-center z-50 transition-opacity duration-500">
         <div class="text-emerald-500 animate-spin text-4xl mb-2"><i class="fas fa-circle-notch"></i></div>
-        <p class="text-xs text-gray-500">Sincronizando dados...</p>
+        <p class="text-xs text-gray-500">Sincronizando infraestrutura...</p>
     </div>
 
     <div class="flex justify-between items-center mb-6">
@@ -32,22 +33,23 @@
     </div>
 
     <div class="card-glass p-4 mb-4 border-l-4 border-blue-500 bg-blue-500/5">
-        <p class="text-[10px] text-blue-500 uppercase font-bold tracking-widest">Hoje</p>
+        <p class="text-[10px] text-blue-500 uppercase font-bold tracking-widest">Hoje (Net 70%)</p>
         <div class="flex justify-between items-end mt-1">
             <div>
-                <p class="text-xs text-gray-500">Lucro do Dia</p>
+                <p class="text-xs text-gray-500">Lucro Real</p>
                 <h2 class="text-2xl font-black text-white" id="d_lucro">R$ 0,00</h2>
             </div>
             <div class="text-right">
-                <p class="text-[10px] text-gray-500">Ganho: <span id="d_ganho" class="text-white font-bold">R$ 0,00</span></p>
-                <p class="text-[10px] text-gray-500">Custo: <span id="d_custo" class="text-red-400 font-bold">R$ 0,00</span></p>
+                <p class="text-[10px] text-gray-500">Bruto: <span id="d_ganho" class="text-white font-bold">R$ 0,00</span></p>
+                <p class="text-[10px] text-amber-500">Reserva (30%): <span id="d_reserva" class="font-bold">R$ 0,00</span></p>
+                <p class="text-[10px] text-red-400">Custo: <span id="d_custo" class="font-bold">R$ 0,00</span></p>
             </div>
         </div>
     </div>
 
     <div class="grid grid-cols-1 gap-4 mb-6">
         <div class="card-glass p-6 border-l-4 border-emerald-500">
-            <p class="text-gray-400 text-sm font-medium">Ganhos do Mês</p>
+            <p class="text-gray-400 text-sm font-medium">Ganhos do Mês (Bruto)</p>
             <h2 class="text-4xl font-black text-white mt-1" id="m_ganho">R$ 0,00</h2>
         </div>
         <div class="grid grid-cols-2 gap-4">
@@ -56,7 +58,7 @@
                 <p class="text-lg font-bold text-custo text-center" id="m_custo">R$ 0,00</p>
             </div>
             <div class="card-glass p-4">
-                <p class="text-gray-400 text-[10px] uppercase font-bold text-center">Lucro Mês</p>
+                <p class="text-gray-400 text-[10px] uppercase font-bold text-center">Lucro Real Mês</p>
                 <p class="text-lg font-bold text-lucro text-center" id="m_lucro">R$ 0,00</p>
             </div>
         </div>
@@ -64,46 +66,50 @@
 
     <div class="card-glass p-4 mb-6">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="font-bold text-sm text-gray-400">Ganhos por Mês</h3>
+            <h3 class="font-bold text-sm text-gray-400">Histórico de Ganhos</h3>
             <select id="seletor_mes" class="bg-gray-800 text-emerald-500 text-xs font-bold outline-none rounded-lg px-2 py-1 border border-gray-700"></select>
         </div>
         <canvas id="chartBarras" height="150"></canvas>
     </div>
 
     <div class="card-glass p-5 mb-6">
-        <h3 class="text-xs font-bold text-gray-500 mb-4 uppercase tracking-widest">Detalhes do Selecionado</h3>
+        <h3 class="text-xs font-bold text-gray-500 mb-4 uppercase tracking-widest text-center">Detalhamento do Mês</h3>
         <div class="space-y-3">
             <div class="flex justify-between">
-                <span class="text-sm text-gray-400">Total Ganho</span>
+                <span class="text-sm text-gray-400">Total Ganho (Bruto)</span>
                 <span id="det_ganho" class="font-bold text-white">R$ 0,00</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-sm text-amber-500">Reserva 30% (Provisionado)</span>
+                <span id="det_reserva" class="font-bold text-amber-500">R$ 0,00</span>
             </div>
             <div class="flex justify-between">
                 <span class="text-sm text-gray-400">Total Custos</span>
                 <span id="det_custo" class="font-bold text-custo">R$ 0,00</span>
             </div>
             <div class="pt-3 border-t border-gray-800 flex justify-between items-center">
-                <span class="text-sm font-bold text-emerald-500">LUCRO NO MÊS</span>
+                <span class="text-sm font-bold text-emerald-500 uppercase">Lucro Líquido Real</span>
                 <span id="det_lucro" class="font-bold text-emerald-500 text-2xl">R$ 0,00</span>
             </div>
         </div>
     </div>
 
     <div class="card-glass p-4 bg-gradient-to-br from-gray-900 to-black border border-gray-700">
-        <p class="text-gray-500 text-[10px] uppercase font-bold">Acumulado Ano 2026</p>
+        <p class="text-gray-500 text-[10px] uppercase font-bold">Resumo Anual 2026</p>
         <div class="flex justify-between items-center mt-2">
             <div>
-                <p class="text-[10px] text-gray-400">Ganho Anual</p>
+                <p class="text-[10px] text-gray-400">Faturamento Bruto</p>
                 <p class="text-sm font-bold text-white" id="a_ganho">R$ 0,00</p>
             </div>
             <div class="text-right">
-                <p class="text-[10px] text-gray-400">Lucro Total</p>
+                <p class="text-[10px] text-gray-400">Lucro Real Acumulado</p>
                 <p class="text-sm font-bold text-emerald-500" id="a_lucro">R$ 0,00</p>
             </div>
         </div>
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbz46GD15sCw-jpmgsreKhWm_rSEe_wJ-4RUHGUXGz5DnJJ_HjQzIHgctC6VUuTO62Hfaw/exec';
+        const API_URL = 'SUA_NOVA_URL_DE_DEPLOY_AQUI';
         let dadosMensais = [];
         let barChart = null;
 
@@ -114,22 +120,19 @@
                 const response = await fetch(API_URL, { redirect: 'follow' });
                 const data = await response.json();
                 
-                // Atualiza Dados Diários
                 document.getElementById('u_time').innerText = data.atualizado_em;
                 document.getElementById('d_ganho').innerText = fmt(data.diario.ganho);
+                document.getElementById('d_reserva').innerText = fmt(data.diario.reserva);
                 document.getElementById('d_custo').innerText = fmt(data.diario.custo);
                 document.getElementById('d_lucro').innerText = fmt(data.diario.lucro);
 
-                // Atualiza Mês Atual
                 document.getElementById('m_ganho').innerText = fmt(data.mensal.ganho);
                 document.getElementById('m_custo').innerText = fmt(data.mensal.custo);
                 document.getElementById('m_lucro').innerText = fmt(data.mensal.lucro);
 
-                // Atualiza Anual
                 document.getElementById('a_ganho').innerText = fmt(data.anual.ganho);
                 document.getElementById('a_lucro').innerText = fmt(data.anual.lucro);
 
-                // Configura Gráfico e Seletor
                 dadosMensais = data.filtros_mensais;
                 const seletor = document.getElementById('seletor_mes');
                 seletor.innerHTML = dadosMensais.map(m => `<option value="${m.id}">${m.mes}</option>`).join('');
@@ -144,7 +147,7 @@
                 setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
             } catch (err) {
                 console.error("Erro ao carregar:", err);
-                document.getElementById('loader').innerHTML = `<p class="text-red-500 font-bold">Falha na Sincronização</p>`;
+                document.getElementById('loader').innerHTML = `<p class="text-red-500 font-bold">Falha no Deploy do Script</p>`;
             }
         }
 
@@ -175,13 +178,13 @@
             const m = dadosMensais.find(x => x.id == id);
             if(m) {
                 document.getElementById('det_ganho').innerText = fmt(m.ganho);
+                document.getElementById('det_reserva').innerText = fmt(m.reserva);
                 document.getElementById('det_custo').innerText = fmt(m.custo);
                 document.getElementById('det_lucro').innerText = fmt(m.lucro);
             }
         }
 
         document.getElementById('seletor_mes').addEventListener('change', (e) => atualizarDetalhe(e.target.value));
-
         init();
     </script>
 </body>
