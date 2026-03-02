@@ -1,4 +1,4 @@
-const CACHE_NAME = 'Vendas de bolo-v7';
+const CACHE_NAME = 'Vendas de bolo-v8';
 const ASSETS = [
   './',
   './index.html',
